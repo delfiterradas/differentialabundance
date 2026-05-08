@@ -141,16 +141,25 @@
                 "rna-seq",
                 "shiny"
             ],
-            "license": ["MIT"],
-            "name": ["nf-core/differentialabundance"],
+            "license": [
+                "MIT"
+            ],
+            "name": [
+                "nf-core/differentialabundance"
+            ],
             "programmingLanguage": {
                 "@id": "https://w3id.org/workflowhub/workflow-ro-crate#nextflow"
             },
             "sdPublisher": {
                 "@id": "https://nf-co.re/"
             },
-            "url": ["https://github.com/nf-core/differentialabundance", "https://nf-co.re/differentialabundance/dev/"],
-            "version": ["1.6.0dev"]
+            "url": [
+                "https://github.com/nf-core/differentialabundance",
+                "https://nf-co.re/differentialabundance/dev/"
+            ],
+            "version": [
+                "1.6.0dev"
+            ]
         },
         {
             "@id": "https://w3id.org/workflowhub/workflow-ro-crate#nextflow",
