@@ -86,7 +86,8 @@ workflow PIPELINE_INITIALISATION {
         show_hidden,
         before_text,
         after_text,
-        command
+        command,
+        null
     )
 
     //
@@ -539,7 +540,7 @@ def prepareModuleOutput(channel, paramsets, List meta_keys_to_remove = null, Boo
             def meta_out = it[1]
 
             // Remove unnecessary keys from meta, when asked
-            def meta_cleaned = meta_keys_to_remove ? meta_out.findAll { k, v -> !meta_keys_to_remove.contains(k) } : meta_out
+            def meta_cleaned = meta_keys_to_remove ? meta_out.findAll { k, _v -> !meta_keys_to_remove.contains(k) } : meta_out
 
             // Replace output meta simplified params by full params from paramset
             def meta = meta_cleaned + [paramset_name: meta_paramset.paramset_name, params: meta_paramset.params]

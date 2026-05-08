@@ -271,61 +271,56 @@ workflow {
     report        = ch_pub_report
     versions      = ch_pub_versions
 }
+def getPreprocessingPath(name, meta) {
+    def folder = [
+        // AFFY
+        affy_raw_expression        : 'tables/processed_abundance',
+        affy_norm_expression       : 'tables/processed_abundance',
+        affy_annotation            : 'tables/annotation',
+        affy_raw_rds               : 'other/affy',
+        affy_cel_files             : 'untar',
 
-output {
-    preprocessing {
-        path { name, meta, file ->
-            def folder = [
-                // AFFY
-                affy_raw_expression        : 'tables/processed_abundance',
-                affy_norm_expression       : 'tables/processed_abundance',
-                affy_annotation            : 'tables/annotation',
-                affy_raw_rds               : 'other/affy',
-                affy_cel_files             : 'untar',
+        // PROTEUS
+        proteus_raw                : 'tables/proteus',
+        proteus_norm               : 'tables/proteus',
+        proteus_plots              : 'plots/proteus',
+        proteus_raw_rdata          : 'other/proteus',
+        proteus_norm_rdata         : 'other/proteus',
+        proteus_session_info       : 'other/proteus',
 
-                // PROTEUS
-                proteus_raw                : 'tables/proteus',
-                proteus_norm               : 'tables/proteus',
-                proteus_plots              : 'plots/proteus',
-                proteus_raw_rdata          : 'other/proteus',
-                proteus_norm_rdata         : 'other/proteus',
-                proteus_session_info       : 'other/proteus',
+        // GEO SOFT
+        geo_expression             : 'tables/processed_abundance',
+        geo_annotation             : 'tables/annotation',
+        geo_rds                    : 'other/affy',
 
-                // GEO SOFT
-                geo_expression             : 'tables/processed_abundance',
-                geo_annotation             : 'tables/annotation',
-                geo_rds                    : 'other/affy',
+        // GTF
+        gtf_annotation             : 'tables/annotation',
 
-                // GTF
-                gtf_annotation             : 'tables/annotation',
+    ][name] ?: name
+    def target = (name in ['proteus_plots', 'proteus_raw_rdata', 'proteus_norm_rdata']) \
+        ? "${folder}/${meta.paramset_name}/${meta.contrast}/" \
+        : "${folder}/${meta.paramset_name}/"
+    return target
+}
 
-            ][name] ?: name
-            def target = (name in ['proteus_plots', 'proteus_raw_rdata', 'proteus_norm_rdata']) \
-                ? "${folder}/${meta.paramset_name}/${meta.contrast}/" \
-                : "${folder}/${meta.paramset_name}/"
-            return target
-        }
-    }
-    differential {
-        path { name, meta, file ->
-            def folder = [
-                results                    : 'tables/differential',
-                results_filtered           : 'tables/differential',
-                annotated                  : 'tables/differential',
-                normalised_matrix          : 'tables/processed_abundance',
-                variance_stabilised_matrix : 'tables/processed_abundance',
-                size_factors               : "other/${meta.params.differential_method}",
-                dispersion_plot            : 'plots/qc',
-                md_plot                    : 'plots/qc',
-                rdata                      : "other/${meta.params.differential_method}",
-                session_info               : "other/${meta.params.differential_method}"
-            ][name] ?: name
-            file >> "${folder}/${meta.paramset_name}/"
-        }
-    }
-    functional {
-        path { name, meta, file ->
-            def method = meta.params.functional_method
+def getDifferentialPath(name, meta, file) {
+    def folder = [
+        results                    : 'tables/differential',
+        results_filtered           : 'tables/differential',
+        annotated                  : 'tables/differential',
+        normalised_matrix          : 'tables/processed_abundance',
+        variance_stabilised_matrix : 'tables/processed_abundance',
+        size_factors               : "other/${meta.params.differential_method}",
+        dispersion_plot            : 'plots/qc',
+        md_plot                    : 'plots/qc',
+        rdata                      : "other/${meta.params.differential_method}",
+        session_info               : "other/${meta.params.differential_method}"
+    ][name] ?: name
+    file >> "${folder}/${meta.paramset_name}/"
+}
+
+def getFunctionalPath(name, meta) {
+    def method = meta.params.functional_method
             def folder = [
                 // GSEA
                 gsea_report_tsv           : 'report/gsea',
@@ -372,29 +367,49 @@ output {
                 : (method == 'gprofiler2') ? "${folder}/${meta.paramset_name}/${meta.id}/" \
                 : "${folder}/${meta.paramset_name}/"
             return target
+}
+
+def getPlottingPath(name, meta, file) {
+    def folder = [
+        exploratory           : 'plots/exploratory',
+        differential_volcanos : 'plots/differential',
+    ][name] ?: name
+    file >> "${folder}/${meta.paramset_name}/"
+}
+
+output {
+    preprocessing {
+        path { name, meta, _file ->
+            getPreprocessingPath(name, meta)
+        }
+    }
+    differential {
+        path { name, meta, file ->
+            getDifferentialPath(name, meta, file)
+        }
+    }
+    functional {
+        path { name, meta, _file ->
+            getFunctionalPath(name, meta)
         }
     }
     plotting {
         path { name, meta, file ->
-            def folder = [
-                exploratory           : 'plots/exploratory',
-                differential_volcanos : 'plots/differential',
-            ][name] ?: name
-            file >> "${folder}/${meta.paramset_name}/"
+            getPlottingPath(name, meta, file)
         }
     }
     shinyngs {
-        path { name, meta, file ->
+        path { _name, meta, file ->
             file >> "shinyngs_app/${meta.paramset_name}/"
         }
     }
     report {
-        path { name, meta, file ->
+        path { _name, meta, file ->
             file >> "report/${meta.paramset_name}/"
         }
     }
     versions {
-        path { name, meta, file ->
+        path { _name, _meta, file ->
             file >> "pipeline_info/"
         }
     }
