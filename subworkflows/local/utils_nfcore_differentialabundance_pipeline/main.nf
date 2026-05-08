@@ -440,8 +440,8 @@ def loadYaml(yaml_path) {
 
     // Substitute ${projectDir} with actual value
     // alternative ways? This can be fragile
-    yaml_content = yaml_content.replaceAll(/\$\{projectDir\}/, projectDir.toString())
-    yaml_content = yaml_content.replaceAll(/\$projectDir/, projectDir.toString())
+    yaml_content = yaml_content.replace('${projectDir}', projectDir.toString())
+    yaml_content = yaml_content.replace('$projectDir', projectDir.toString())
 
     // Parse yaml content
     def yaml_parser = new org.yaml.snakeyaml.Yaml()
